@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Digitales Speicher-Oszilloskop mit VGA Anschluss</title>
+	<style type="text/css">
+	.dot {
+		background:#FF0066;
+		position:absolute;
+	    width:2px;
+	    height:2px;
+	    bgcolor:#FF0066;
+	    color:#FF0066;
+	}
+	
+	.graf {
+		position:absolute;
+		width:512px;
+		height:256px;
+		top:50px;
+		left:50px;
+		z-index:1;
+		text-align:center;
+		border:20px solid grey;
+		
+		background-image: url('osz.png');
+		background-repeat: repeat;
+		background-color: green;
+	}
+	</style>
+</head>
+<body>
+	<script src="ajax_new.js" type="text/javascript" charset="utf-8"></script>
+	<div id=a></div>
+	<div id='graf' class="graf" onload="ajax('next.html')"></div>
+</body>
+</html>

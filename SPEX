@@ -1,0 +1,17 @@
+set_ac
+set_dc
+
+set_100ms
+set_10ms
+set_1ms
+set_100us
+set_10us
+set_1us
+set_1s
+
+set_5V
+set_2V
+set_1V
+set_500mV
+set_200mV
+set_100mV
