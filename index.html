@@ -3,35 +3,49 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Digitales Speicher-Oszilloskop mit VGA Anschluss</title>
+	<script src="ajax_new.js" type="text/javascript" charset="utf-8"></script>
 	<style type="text/css">
-	.dot {
-		background:#FF0066;
-		position:absolute;
-	    width:2px;
-	    height:2px;
-	    bgcolor:#FF0066;
-	    color:#FF0066;
+	.graf {
+		border:20px solid #cccccc;
+	}
+
+	input.btn { 
+		color:#050;
+		background-color:#fed; 
+		border:1px solid; 
+		border-color: #696 #363 #363 #696; 
 	}
 	
-	.graf {
-		position:absolute;
-		width:512px;
-		height:256px;
-		top:50px;
-		left:50px;
-		z-index:1;
-		text-align:center;
-		border:20px solid grey;
-		
-		background-image: url('osz.png');
-		background-repeat: repeat;
-		background-color: green;
+	.label {
+		font-family:"Lucida Console", Monospace;
+		font-size:.75em;
 	}
 	</style>
 </head>
-<body>
-	<script src="ajax_new.js" type="text/javascript" charset="utf-8"></script>
-	<div id=a></div>
-	<div id='graf' class="graf" onload="ajax('next.html')"></div>
+<body onload="ajax('next_str.html')">
+	<!-- <div id="graf" class="graf"></div> -->
+	<canvas id="gridCanvas" width="500" height="250" class="graf"></canvas>
+	<div>
+		<input type="button" value="AC" class="btn" onclick="couplingChanged(this);"/>
+		<span class="label">TIME / DIV:</span>
+		<select id="timescale" onchange="timescaleChanged(this.value);">
+			<option value="1s">1s</option>
+			<option value="100ms">100ms</option>
+			<option value="10ms">10ms</option>
+			<option value="1ms">1ms</option>
+			<option value="100us">100us</option>
+			<option value="10us">10us</option>
+			<option value="1us">1us</option>
+		</select>
+		<span class="label">VOLTS / DIV:</span>
+		<select id="volts" onchange="voltsChanged(this.value);">
+			<option value="5V">5V</option>
+			<option value="2V">2V</option>
+			<option value="1V">1V</option>
+			<option value="500mV">500mV</option>
+			<option value="200mV">200mV</option>
+			<option value="100mV">100mV</option>
+		</select>
+	</div>
 </body>
 </html>
