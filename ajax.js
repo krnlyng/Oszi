@@ -110,7 +110,7 @@ function ajax(url) {
 			var content_all = str.split(";");
 			for(i=0;i<content_all.length;i++)
 			{
-				if(!content_all[i])return;
+				if(!content_all[i])continue;
 				v=parseInt(content_all[i], 10)+127;
 				if(!positionCache[i])
 					positionCache[i] = new pos_pair(i, v);
