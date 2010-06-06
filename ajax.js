@@ -1,6 +1,6 @@
 /*
 Oszi web based digital storage oscilloscope client.
-Copyright (C) 2010  Daniel Gröber, Franz Haider
+Copyright (C) 2010  Daniel Gröber, Franz-Josef Haider
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -109,17 +109,18 @@ function ajax(url) {
 			var i=0,v=0,t='0px',l='0px';
 			var str = xmlhttp.responseText;
 			var content_all = str.split(";");
-				
 			for(i=0;i<content_all.length;i++)
 			{
 				v=parseInt(content_all[i], 10)+127;
-				
-				if(!positionCache[i])
-					positionCache[i] = new pos_pair(i, v);
-				else
+				if(!isNaN(v))
 				{
-					positionCache[i].x = i;
-					positionCache[i].y = v;
+					if(!positionCache[i])
+						positionCache[i] = new pos_pair(i, v);
+					else
+					{
+						positionCache[i].x = i;
+						positionCache[i].y = v;
+					}
 				}
 			}
 			
