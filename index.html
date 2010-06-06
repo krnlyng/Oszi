@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Digitales Speicher-Oszilloskop mit VGA Anschluss</title>
-	<script src="ajax_new.js" type="text/javascript" charset="utf-8"></script>
+	<script src="ajax.js" type="text/javascript" charset="utf-8"></script>
 	<style type="text/css">
 	.graf {
 		border:20px solid #cccccc;
@@ -92,6 +92,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			var textWidth = getCanvasContext().measureText(text).width;
 			getCanvasContext().fillText("Delta: " + text, 80, 11);
 		}
+		else if (cursorType == 3)
+		{
+			var voltsPerDiv = scaleStuff(voltsScale).rawNumber;
+			
+			var cursor1Val = -1 * (((cursor1Pos-halfCanvasHeight)/canvasHeight) * voltsPerDiv * 10).toFixed(2);
+			var text = cursor1Val + scaleStuff(voltsScale).scale_str;
+			var textWidth = getCanvasContext().measureText(text).width;
+			getCanvasContext().fillText(text, cWidth-textWidth,cursor1Pos-5);
+		}
 	}
 	renderHooks.push(render_cursors_text);
 	</script>
@@ -113,18 +122,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		</select>
 		<span class="label">VOLTS / DIV:</span>
 		<select id="volts" onchange="voltsChanged(this.value);">
-			<option value="5V">5V</option>
-			<option value="2V">2V</option>
-			<option value="1V">1V</option>
 			<option value="500mV">500mV</option>
 			<option value="200mV">200mV</option>
 			<option value="100mV">100mV</option>
+			<option value="50mV">50mV</option>
+			<option value="20mV">20mV</option>
+			<option value="10mV">10mV</option>
 		</select>
 		<span class="label">Cursor type:</span>
 		<select id="curs" onchange="cursor_type_changed(this.value);">
 			<option value="0">off</option>
 			<option value="1">Voltage</option>
 			<option value="2">Time</option>
+			<option value="3">Trigger</option>
 		</select>
 	</div>
 </body>

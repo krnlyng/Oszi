@@ -21,6 +21,10 @@ function getCanvasContext() { return getCanvas().getContext("2d") }
 
 function canvas_line(ctx, x1, y1, x2, y2)
 {
+	if(isNaN(x1)) { /*console.log("x1: " + x1 + " " + from);*/ return; }
+	if(isNaN(y1)) { /*console.log("y1: " + y1 + " " + from);*/ return; }
+	if(isNaN(x2)) { /*console.log("x2: " + x2 + " " + from);*/ return; }
+	if(isNaN(y2)) { /*console.log("y2: " + y2 + " " + from);*/ return; }
 	ctx.beginPath();
 	ctx.moveTo(x1, y1);
 	ctx.lineTo(x2, y2);
@@ -69,7 +73,12 @@ function draw_grid()
 	{
 		var x = i*x_div;
 		var y = i*y_div;
+		setCanvasStyle(null,false);
 		canvas_line(ctx, x, 0, x, canvas.height);
+		if(i == 5)
+		{
+			setCanvasStyle("#BBBBBB",false);
+		}
 		canvas_line(ctx, 0, y, canvas.width, y);
 	}
 }
@@ -107,7 +116,7 @@ function ajax(url) {
 			for(i=0;i<content_all.length;i++)
 			{
 				v=parseInt(content_all[i], 10)+127;
-				v1=parseInt(content_all[i+1], 10)+127;
+				//v1=parseInt(content_all[i+1], 10)+127;
 				
 				if(!positionCache[i])
 					positionCache[i] = new pos_pair(i, v);
@@ -121,7 +130,7 @@ function ajax(url) {
 			render_canvas();
 			
 			ajaxBusy=false;
-			setTimeout('ajax(\''+url+'\')',500);
+			setTimeout('ajax(\''+url+'\')',20);
 		}
 	}
 	xmlhttp.open('GET',url,true);
@@ -134,6 +143,7 @@ function render_canvas()
 	render_signal();
 	for(var i=0; i < renderHooks.length ;i++)
 	{
+		//console.log("rendering hook");
 		renderHooks[i]();
 	}
 }
@@ -147,7 +157,8 @@ function render_signal()
 	setCanvasStyle("#11FF00")
 	
 	var cacheLength = positionCache.length-1;
-	for(i=0; i < cacheLength ;i++)
+	//console.log(cacheLength);
+	for(i=0; i < cacheLength-1 ;i++)
 	{
 		canvas_line(ctx, positionCache[i].x, positionCache[i].y, positionCache[i+1].x, positionCache[i+1].y);
 	}
@@ -165,7 +176,7 @@ function setServerParam(param, value)
 		ajaxObj=new ActiveXObject("Microsoft.XMLHTTP");
 	}
 	if(param!="reset")
-		ajaxObj.open('GET',"set_"+value,true);
+		ajaxObj.open('GET',"set_" + param + "_" + value,true);
 	else
 		ajaxObj.open('GET',value,true);
 	ajaxObj.send();
@@ -183,22 +194,22 @@ window.addEventListener("load", function(e){
 var timeScale = "1ms"
 function timescaleChanged(new_timescale)
 {
-	console.log("TIME/DIV changed to: " + new_timescale);
+	//console.log("TIME/DIV changed to: " + new_timescale);
 	timeScale = new_timescale;
 	setServerParam("time", new_timescale);
 }
 
-var voltsScale = "5V"
+var voltsScale = "500mV"
 function voltsChanged(new_volts)
 {
-	console.log("VOLTS/DIV changed to: " + new_volts);
+	//console.log("VOLTS/DIV changed to: " + new_volts);
 	voltsScale = new_volts;
 	setServerParam("volts", new_volts);
 }
 
 function couplingChanged(button_element)
 {
-	console.log("Toggle coupling");
+	//console.log("Toggle coupling");
 	var current_coupling = button_element.value;
 	var new_coupling;
 	
@@ -218,12 +229,15 @@ function couplingChanged(button_element)
 
 function all_loaded()
 {
-document.getElementById("gridCanvas").addEventListener("mousemove", function(e){
+getCanvas().addEventListener("mousemove", function(e){
 	//console.log("mm x: " + (e.offsetX - 20) + " y: " + (e.offsetY - 20));
-	mouseEvent(e.offsetX-20, e.offsetY-20);
+	//mouseEvent(e.offsetX-20, e.offsetY-20);
+	mouseEvent(e.clientX-20, e.clientY-20);
 }, false);
-document.getElementById("gridCanvas").addEventListener("click", function(e){
-	cursor_state_changed(e.offsetX-20, e.offsetY-20, e);
+getCanvas().addEventListener("click", function(e){
+	//cursor_state_changed(e.offsetX-20, e.offsetY-20, e);
+	cursor_state_changed(e.clientX-20, e.clientY-20, e);
+
 }, false);
 }
 
@@ -260,8 +274,10 @@ var cursorType = 0;
 var cursorState = 0;
 var cursor1Pos = 100;
 var cursor2Pos = 200;
+var trigger_level = 0;
 function cursor_type_changed(new_type)
 {
+	//console.log("Ctype: " + new_type);
 	cursorType = new_type;
 	if(cursorType == 1)
 	{
@@ -272,20 +288,45 @@ function cursor_type_changed(new_type)
 		cursor1Pos = getCanvas().width/4;
 		cursor2Pos = 3*(getCanvas().width/4);
 	}
+	else if(cursorType == 3)
+	{
+		cursor1Pos = getCanvas().height/2 + trigger_level;
+	}
 }
+
+var alreadyClicked = false;
 
 function cursor_state_changed(clickPosX, clickPosY, event)
 {
+	if(event.type == "click")
+	{
+		if(alreadyClicked)
+		{
+			if(cursorType == 3)
+			{
+				setServerParam("trigger",128 - clickPosY);
+				trigger_level = 128 - clickPosY;
+			}
+			cursorState = 0;
+			alreadyClicked = false;
+			return;
+		}
+		else alreadyClicked = true;
+	}
+	/*
 	if(event.shiftKey == true){
 		cursorState = 0;
 		return;
+	}*/
+	
+
+	if(cursorType != 3)
+	{
+		xDist1 = Math.abs(cursor1Pos - clickPosX);
+		xDist2 = Math.abs(cursor2Pos - clickPosX);
+		yDist1 = Math.abs(cursor1Pos - clickPosY);
+		yDist2 = Math.abs(cursor2Pos - clickPosY);
 	}
-	
-	xDist1 = Math.abs(cursor1Pos - clickPosX);
-	xDist2 = Math.abs(cursor2Pos - clickPosX);
-	yDist1 = Math.abs(cursor1Pos - clickPosY);
-	yDist2 = Math.abs(cursor2Pos - clickPosY);
-	
 	
 	/*
 	console.log("cursor1Pos: " + cursor1Pos);
@@ -313,6 +354,10 @@ function cursor_state_changed(clickPosX, clickPosY, event)
 		else
 			cursorState = 2;
 	}
+	else if(cursorType == 3)
+	{
+		cursorState = 1;
+	}
 }
 
 var render_cursors = function()
@@ -325,11 +370,17 @@ var render_cursors = function()
 		// Voltage
 		hori_line(cursor1Pos);
 		hori_line(cursor2Pos);
-	}else if(cursorType == 2)
+	}
+	else if(cursorType == 2)
 	{
 		// Time
 		vert_line(cursor1Pos);
 		vert_line(cursor2Pos);
+	}
+	else if(cursorType == 3)
+	{
+		setCanvasStyle("#FF0000",false);
+		hori_line(cursor1Pos);
 	}
 }
 renderHooks.push(render_cursors);
@@ -343,6 +394,10 @@ function mouseEvent(x, y)
 	{
 		if(cursorState == 1) cursor1Pos = x;
 		if(cursorState == 2) cursor2Pos = x;
+	}
+	else if(cursorType == 3)
+	{
+		if(cursorState == 1) cursor1Pos = y;
 	}
 	
 	render_canvas();
