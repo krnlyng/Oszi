@@ -21,10 +21,7 @@ function getCanvasContext() { return getCanvas().getContext("2d") }
 
 function canvas_line(ctx, x1, y1, x2, y2)
 {
-	if(isNaN(x1)) { /*console.log("x1: " + x1 + " " + from);*/ return; }
-	if(isNaN(y1)) { /*console.log("y1: " + y1 + " " + from);*/ return; }
-	if(isNaN(x2)) { /*console.log("x2: " + x2 + " " + from);*/ return; }
-	if(isNaN(y2)) { /*console.log("y2: " + y2 + " " + from);*/ return; }
+	if(isNaN(x1) || isNaN(x2) || isNaN(y1) || isNaN(y2)) debugger;
 	ctx.beginPath();
 	ctx.moveTo(x1, y1);
 	ctx.lineTo(x2, y2);
@@ -116,7 +113,6 @@ function ajax(url) {
 			for(i=0;i<content_all.length;i++)
 			{
 				v=parseInt(content_all[i], 10)+127;
-				//v1=parseInt(content_all[i+1], 10)+127;
 				
 				if(!positionCache[i])
 					positionCache[i] = new pos_pair(i, v);
@@ -130,7 +126,7 @@ function ajax(url) {
 			render_canvas();
 			
 			ajaxBusy=false;
-			setTimeout('ajax(\''+url+'\')',20);
+			setTimeout('ajax(\''+url+'\')',500);
 		}
 	}
 	xmlhttp.open('GET',url,true);
@@ -143,7 +139,6 @@ function render_canvas()
 	render_signal();
 	for(var i=0; i < renderHooks.length ;i++)
 	{
-		//console.log("rendering hook");
 		renderHooks[i]();
 	}
 }
@@ -157,8 +152,7 @@ function render_signal()
 	setCanvasStyle("#11FF00")
 	
 	var cacheLength = positionCache.length-1;
-	//console.log(cacheLength);
-	for(i=0; i < cacheLength-1 ;i++)
+	for(i=0; i < cacheLength ;i++)
 	{
 		canvas_line(ctx, positionCache[i].x, positionCache[i].y, positionCache[i+1].x, positionCache[i+1].y);
 	}
@@ -230,12 +224,9 @@ function couplingChanged(button_element)
 function all_loaded()
 {
 getCanvas().addEventListener("mousemove", function(e){
-	//console.log("mm x: " + (e.offsetX - 20) + " y: " + (e.offsetY - 20));
-	//mouseEvent(e.offsetX-20, e.offsetY-20);
 	mouseEvent(e.clientX-20, e.clientY-20);
 }, false);
 getCanvas().addEventListener("click", function(e){
-	//cursor_state_changed(e.offsetX-20, e.offsetY-20, e);
 	cursor_state_changed(e.clientX-20, e.clientY-20, e);
 
 }, false);
@@ -277,7 +268,6 @@ var cursor2Pos = 200;
 var trigger_level = 0;
 function cursor_type_changed(new_type)
 {
-	//console.log("Ctype: " + new_type);
 	cursorType = new_type;
 	if(cursorType == 1)
 	{
@@ -313,12 +303,6 @@ function cursor_state_changed(clickPosX, clickPosY, event)
 		}
 		else alreadyClicked = true;
 	}
-	/*
-	if(event.shiftKey == true){
-		cursorState = 0;
-		return;
-	}*/
-	
 
 	if(cursorType != 3)
 	{
@@ -327,18 +311,6 @@ function cursor_state_changed(clickPosX, clickPosY, event)
 		yDist1 = Math.abs(cursor1Pos - clickPosY);
 		yDist2 = Math.abs(cursor2Pos - clickPosY);
 	}
-	
-	/*
-	console.log("cursor1Pos: " + cursor1Pos);
-	console.log("cursor2Pos: " + cursor2Pos);
-	
-	console.log("clickPosX: " + clickPosX);
-	console.log("clickPosY: " + clickPosY);
-			
-	console.log("xDist1: " + xDist1);
-	console.log("xDist2: " + xDist2);
-	console.log("yDist1: " + yDist1);
-	console.log("yDist2: " + yDist2);*/
 	
 	if(cursorType == 1) // Voltage
 	{
@@ -362,9 +334,6 @@ function cursor_state_changed(clickPosX, clickPosY, event)
 
 var render_cursors = function()
 {
-	/*console.log("cursor1Pos: " + cursor1Pos);
-	console.log("cursor2Pos: " + cursor2Pos);*/
-	
 	if(cursorType == 1)
 	{
 		// Voltage
@@ -402,3 +371,65 @@ function mouseEvent(x, y)
 	
 	render_canvas();
 }
+
+var render_cursors_text = function()
+{
+	var cWidth = getCanvas().width;
+	
+	var canvasHeight = getCanvas().height;
+	var halfCanvasHeight = canvasHeight / 2;
+	
+	var canvasWidth = getCanvas().width;
+	var halfCanvasWidth = canvasWidth/2;
+	
+	if(cursorType == 1)
+	{
+		// Voltage
+		
+		var voltsPerDiv = scaleStuff(voltsScale).rawNumber;
+		
+		var cursor1Val = -1 * (((cursor1Pos-halfCanvasHeight)/canvasHeight) * voltsPerDiv * 10).toFixed(2);
+		var text = cursor1Val + scaleStuff(voltsScale).scale_str;
+		var textWidth = getCanvasContext().measureText(text).width;
+		getCanvasContext().fillText(text, cWidth-textWidth,cursor1Pos-5);
+		
+		var cursor2Val = -1 * (((cursor2Pos-halfCanvasHeight)/canvasHeight) * voltsPerDiv * 10).toFixed(2);
+		var text = cursor2Val + scaleStuff(voltsScale).scale_str;
+		var textWidth = getCanvasContext().measureText(text).width;
+		getCanvasContext().fillText(text, cWidth-textWidth,cursor2Pos-5);
+		
+		var deltaV = (cursor1Val - cursor2Val).toFixed(1);
+		var text = deltaV + scaleStuff(voltsScale).scale_str;
+		var textWidth = getCanvasContext().measureText(text).width;
+		getCanvasContext().fillText("Delta: " + text, textWidth-10, 11);
+	}else if(cursorType == 2)
+	{
+		// Time
+		
+		var timePerDiv = scaleStuff(timeScale).rawNumber;
+		
+		var cursor1Val = ((cursor1Pos/canvasWidth) * timePerDiv * 10).toFixed(2);
+		var text = cursor1Val + scaleStuff(timeScale).scale_str;
+		getCanvasContext().fillText(text, cursor1Pos, 10);
+		
+		var cursor2Val = ((cursor2Pos/canvasWidth) * timePerDiv * 10).toFixed(2);
+		var text = cursor2Val + scaleStuff(timeScale).scale_str;
+		getCanvasContext().fillText(text, cursor2Pos, 10);
+	
+	
+		var deltaT = (cursor2Val - cursor1Val).toFixed(1);
+		var text = deltaT + scaleStuff(timeScale).scale_str;
+		var textWidth = getCanvasContext().measureText(text).width;
+		getCanvasContext().fillText("Delta: " + text, 80, 11);
+	}
+	else if (cursorType == 3)
+	{
+		var voltsPerDiv = scaleStuff(voltsScale).rawNumber;
+		
+		var cursor1Val = -1 * (((cursor1Pos-halfCanvasHeight)/canvasHeight) * voltsPerDiv * 10).toFixed(2);
+		var text = cursor1Val + scaleStuff(voltsScale).scale_str;
+		var textWidth = getCanvasContext().measureText(text).width;
+		getCanvasContext().fillText(text, cWidth-textWidth,cursor1Pos-5);
+	}
+}
+renderHooks.push(render_cursors_text);
