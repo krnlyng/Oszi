@@ -1,17 +1,27 @@
-set_ac
-set_dc
 
-set_100ms
-set_10ms
-set_1ms
-set_100us
-set_10us
-set_1us
-set_1s
+COUPLING:
+set_coupling_ac
+set_coupling_dc
 
-set_5V
-set_2V
-set_1V
-set_500mV
-set_200mV
-set_100mV
+TIME/DIV:
+set_time_100ms
+set_time_10ms
+set_time_1ms
+set_time_100us
+set_time_10us
+set_time_1us
+set_time_1s
+
+VOLTS/DIV:
+set_volts_500mV
+set_volts_200mV
+set_volts_100mV
+set_volts_50mV
+set_volts_20mV
+set_volts_10mV
+
+TRIGGER:
+set_trigger_X
+> X is a value between -128 and 127
+> TODO: change the unit of X to Volt
+
