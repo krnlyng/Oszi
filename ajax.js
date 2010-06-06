@@ -21,7 +21,6 @@ function getCanvasContext() { return getCanvas().getContext("2d") }
 
 function canvas_line(ctx, x1, y1, x2, y2)
 {
-	if(isNaN(x1) || isNaN(x2) || isNaN(y1) || isNaN(y2)) return;
 	ctx.beginPath();
 	ctx.moveTo(x1, y1);
 	ctx.lineTo(x2, y2);
@@ -111,16 +110,14 @@ function ajax(url) {
 			var content_all = str.split(";");
 			for(i=0;i<content_all.length;i++)
 			{
+				if(!content_all[i])return;
 				v=parseInt(content_all[i], 10)+127;
-				if(!isNaN(v))
+				if(!positionCache[i])
+					positionCache[i] = new pos_pair(i, v);
+				else
 				{
-					if(!positionCache[i])
-						positionCache[i] = new pos_pair(i, v);
-					else
-					{
-						positionCache[i].x = i;
-						positionCache[i].y = v;
-					}
+					positionCache[i].x = i;
+					positionCache[i].y = v;
 				}
 			}
 			
