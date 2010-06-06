@@ -21,7 +21,7 @@ function getCanvasContext() { return getCanvas().getContext("2d") }
 
 function canvas_line(ctx, x1, y1, x2, y2)
 {
-	if(isNaN(x1) || isNaN(x2) || isNaN(y1) || isNaN(y2)) debugger;
+	if(isNaN(x1) || isNaN(x2) || isNaN(y1) || isNaN(y2)) return;
 	ctx.beginPath();
 	ctx.moveTo(x1, y1);
 	ctx.lineTo(x2, y2);
