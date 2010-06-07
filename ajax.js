@@ -278,7 +278,7 @@ function cursor_type_changed(new_type)
 	}
 	else if(cursorType == 3)
 	{
-		cursor1Pos = getCanvas().height/2 + trigger_level;
+		cursor1Pos = getCanvas().height/2 - trigger_level;
 	}
 }
 
